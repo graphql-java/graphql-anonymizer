@@ -1,0 +1,6 @@
+.gradle
+.idea
+build
+out
+graphql-anonymizer
+.DS_Store

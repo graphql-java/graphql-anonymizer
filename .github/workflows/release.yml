@@ -1,0 +1,210 @@
+name: release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'the version to be released'
+        required: true
+
+jobs:
+  build-jar-job:
+    name: 'Build JAR'
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: 'Setup Java 11'
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: 'Build JAR'
+        run: |
+          ./gradlew clean build shadowJar
+
+      - name: 'Publish JAR'
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar'
+          path: build/libs/*-all.jar
+
+      - name: 'Create Release'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          tag_name: 'v${{env.RELEASE_VERSION}}'
+          release_name: 'Version ${{env.RELEASE_VERSION}}'
+          body: |
+            New Release
+          draft: false
+          prerelease: false
+
+      - name: 'Upload Release Asset'
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{steps.create_release.outputs.upload_url}}
+          asset_path: build/libs/graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar
+          asset_name: graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar
+          asset_content_type: application/java-archive
+
+
+      - name: 'Write Upload URL To File'
+        run: |
+          echo "${{steps.create_release.outputs.upload_url}}" > upload_url.txt
+
+      - name: 'Publish Upload URL'
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: 'upload_url.txt'
+          path: 'upload_url.txt'
+
+  build-non-windows-image:
+    name: 'Build Non-Windows Image'
+    needs: [ build-jar-job ]
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest' ]
+        include:
+          - os: 'ubuntu-latest'
+            label: 'linux'
+          - os: 'macos-latest'
+            label: 'mac'
+    runs-on: ${{matrix.os}}
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+
+
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: 'Setup Java 11'
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      - name: 'Setup GraalVM Environment'
+        uses: DeLaGuardo/setup-graalvm@2.0
+        with:
+          graalvm-version: '21.1.0.2.java11'
+
+      - name: 'Install Native Image Plugin'
+        run: |
+          gu install native-image
+
+      - name: 'Get JAR Artifact'
+        uses: actions/download-artifact@v2-preview
+        with:
+          name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar'
+
+      - name: 'Get Release URL'
+        uses: actions/download-artifact@v2-preview
+        with:
+          name: 'upload_url.txt'
+
+      - name: 'Get Upload URL'
+        run: |
+          echo "::set-env name=UPLOAD_URL::$(cat upload_url.txt)"
+
+      - name: 'Build Native Image'
+        run: |
+          native-image -H:+ReportExceptionStackTraces -H:+ReportUnsupportedElementsAtRuntime --verbose --no-server --no-fallback --allow-incomplete-classpath -jar graphql-anonymizer-${{env.RELEASEVERSION}}-all.jar
+
+      - name: 'Publish Native Image'
+        if: success()
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-${{matrix.label}}'
+          path: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all'
+
+      - name: 'Release Native Image Asset'
+        if: success() && contains(github.ref, 'v')
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{env.UPLOAD_URL}}
+          asset_name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-${{matrix.label}}'
+          asset_path: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all'
+          asset_content_type: application/octet-stream
+
+  build-windows-image:
+    needs: [ build-jar-job ]
+    name: 'Build Windows Image'
+    runs-on: windows-latest
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+
+
+    steps:
+
+      - name: 'Checkout'
+        uses: actions/checkout@v1
+
+      - name: 'Download GraalVM'
+        run: |
+          Invoke-RestMethod -Uri https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-21.0.0.2/graalvm-ce-java11-windows-amd64-21.0.0.2.zip -OutFile 'graal.zip'
+
+      - name: 'Install GraalVM'
+        run: |
+          Expand-Archive -path 'graal.zip' -destinationpath '.'
+
+      - name: 'Install Native Image'
+        run: |
+          graalvm-ce-java11-21.0.0.2\bin\gu.cmd install native-image
+
+      - name: 'Set up Visual C Build Tools Workload for Visual Studio 2017 Build Tools'
+        run: |
+          choco install visualstudio2017-workload-vctools
+
+      - name: 'Get JAR Artifact'
+        uses: actions/download-artifact@v2-preview
+        with:
+          name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar'
+
+      - name: 'Build Native Image'
+        shell: cmd
+        env:
+          JAVA_HOME: ./graalvm-ce-java11-21.0.0.2
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
+          ./graalvm-ce-java11-21.0.0.2/bin/native-image --no-server --no-fallback -H:ReflectionConfigurationResources=reflection-config.json -H:IncludeResources=logback.xml -H:Name=graphql-anonymizer-${{env.RELEASE_VERSION}}-all --allow-incomplete-classpath -jar graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar
+
+      - name: 'Get Release URL'
+        uses: actions/download-artifact@v2-preview
+        with:
+          name: 'upload_url.txt'
+
+      - name: 'Get Upload URL'
+        run: |
+          echo "::set-env name=UPLOAD_URL::$(cat upload_url.txt)"
+        shell: bash
+
+      - name: 'Publish Windows Image'
+        if: success()
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-windows.exe'
+          path: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all.exe'
+
+      - name: 'Release Windows Image Asset'
+        if: success()
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          upload_url: ${{env.UPLOAD_URL}}
+          asset_name: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-windows.exe'
+          asset_path: 'graphql-anonymizer-${{env.RELEASE_VERSION}}-all.exe'
+          asset_content_type: application/octet-stream
