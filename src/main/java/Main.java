@@ -30,6 +30,7 @@ public class Main implements Callable<String> {
         GraphQLSchema graphQLSchema = new SchemaGenerator().makeExecutableSchema(typeDefinitionRegistry, MockedWiring.MOCKED_WIRING);
         GraphQLSchema anonSchema = Anonymizer.anonymizeSchema(graphQLSchema);
         String printedSchema = new SchemaPrinter().print(anonSchema);
+        System.out.println(printedSchema);
         return printedSchema;
     }
 
