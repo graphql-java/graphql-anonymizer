@@ -117,7 +117,7 @@ jobs:
 
       - name: 'Build Native Image'
         run: |
-          native-image -H:+ReportExceptionStackTraces -H:+ReportUnsupportedElementsAtRuntime --verbose --no-server --no-fallback --allow-incomplete-classpath -jar graphql-anonymizer-${{env.RELEASEVERSION}}-all.jar
+          native-image -H:+ReportExceptionStackTraces -H:+ReportUnsupportedElementsAtRuntime --verbose --no-server --no-fallback --allow-incomplete-classpath -jar graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar
 
       - name: 'Publish Native Image'
         if: success()
@@ -178,7 +178,7 @@ jobs:
           JAVA_HOME: ./graalvm-ce-java11-21.0.0.2
         run: |
           call "C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvars64.bat"
-          ./graalvm-ce-java11-21.0.0.2/bin/native-image --no-server --no-fallback -H:ReflectionConfigurationResources=reflection-config.json -H:IncludeResources=logback.xml -H:Name=graphql-anonymizer-${{env.RELEASE_VERSION}}-all --allow-incomplete-classpath -jar graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar
+          ./graalvm-ce-java11-21.0.0.2/bin/native-image -H:+ReportExceptionStackTraces -H:+ReportUnsupportedElementsAtRuntime --verbose --no-server --no-fallback -H:Name=graphql-anonymizer-${{env.RELEASE_VERSION}}-all --allow-incomplete-classpath -jar graphql-anonymizer-${{env.RELEASE_VERSION}}-all.jar
 
       - name: 'Get Release URL'
         uses: actions/download-artifact@v2-preview
