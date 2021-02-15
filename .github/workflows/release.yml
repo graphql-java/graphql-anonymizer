@@ -113,7 +113,7 @@ jobs:
 
       - name: 'Get Upload URL'
         run: |
-          echo "::set-env name=UPLOAD_URL::$(cat upload_url.txt)"
+          echo "UPLOAD_URL=$(cat upload_url.txt)" >> $GITHUB_ENV
 
       - name: 'Build Native Image'
         run: |
@@ -187,7 +187,7 @@ jobs:
 
       - name: 'Get Upload URL'
         run: |
-          echo "::set-env name=UPLOAD_URL::$(cat upload_url.txt)"
+          echo "UPLOAD_URL=(cat upload_url.txt)" >> $GITHUB_ENV
         shell: bash
 
       - name: 'Publish Windows Image'
