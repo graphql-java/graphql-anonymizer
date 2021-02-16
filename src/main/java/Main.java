@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
 import static picocli.CommandLine.*;
 
 @Command(name = "graphql-anonymizer", mixinStandardHelpOptions = true, version = "graphql-anonymizer 1.0",
-        description = "Prints the checksum (MD5 by default) of a file to STDOUT.")
+        description = "Aononymize GraphQL schemas and queries.")
 public class Main implements Callable<String> {
 
 
