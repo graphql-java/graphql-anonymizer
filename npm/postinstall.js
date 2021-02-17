@@ -6,8 +6,10 @@ const os = require("os");
 const {version} = require("./package.json");
 
 const prefix = getPlatformPrefix();
-const url = `https://github.com/graphql-java/graphql-anonymizer/releases/download/v${version}/graphql-anonymizer-${version}-${prefix}`;
-
+let url = `https://github.com/graphql-java/graphql-anonymizer/releases/download/v${version}/graphql-anonymizer-${version}-${prefix}`;
+if (prefix === 'windows') {
+    url += '.exe';
+}
 axios({url, responseType: "stream"})
     .then(res => {
         return res.data.pipe(createWriteStream(join(__dirname, "graphql-anonymizer")));
