@@ -32,8 +32,7 @@ jobs:
 
       - name: 'run'
         id: run-anonymizer
-        run: |
-          ::set-output name=result::$(graphql-anonymizer <<< 'type Query{a:String}')
+        run: echo "::set-output name=result::$(graphql-anonymizer <<< 'type Query{a:String}')"
 
       - name: 'test'
         run: echo ${{steps.run-anonymizer.outputs.result}}
