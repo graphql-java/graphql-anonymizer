@@ -34,6 +34,6 @@ jobs:
         id: run-anonymizer
         run: graphql-anonymizer <<< 'type Query{a:String}' > test_result
 
-      - name: 'test'
-        run: grep "field1" test_result
+      - name: 'assert'
+        run: grep "fieldX" test_result
 
