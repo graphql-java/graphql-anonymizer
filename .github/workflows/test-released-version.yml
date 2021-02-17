@@ -1,0 +1,39 @@
+name: test-released-version
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'the version to be tested'
+        required: true
+
+jobs:
+
+  test-non-windows-image:
+    name: 'Build Non-Windows Image'
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest' ]
+        include:
+          - os: 'ubuntu-latest'
+            label: 'linux'
+          - os: 'macos-latest'
+            label: 'mac'
+    runs-on: ${{matrix.os}}
+
+
+    steps:
+      - name: 'Setup Node'
+        uses: actions/setup-node@2
+        with:
+          node-version: 12.x
+
+      - name: 'install'
+        run: npm i -g graphql-anonymizer@${{github.event.inputs.version}}
+
+      - name: 'run'
+        id: run-anonymizer
+        run: "::set-output name=result::$(graphql-anonymizer <<< 'type Query{a:String}')"
+
+      - name: 'test'
+        run: echo ${{steps.run-anonymizer.outputs.result}}
+
