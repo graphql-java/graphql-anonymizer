@@ -1,0 +1,7 @@
+type Query{
+    mySecret(arg: String): MySecret
+}
+type MySecret {
+    id: ID
+    dontExposeThat: String
+}

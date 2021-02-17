@@ -1,0 +1,1 @@
+{mySecret(arg: "myValue") { id dontExposeThat } }
