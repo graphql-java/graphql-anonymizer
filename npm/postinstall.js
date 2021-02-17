@@ -15,7 +15,7 @@ axios({url, responseType: "stream"})
         return res.data.pipe(createWriteStream(join(__dirname, "graphql-anonymizer")));
     })
     .then(() => {
-        console.log(`graphql-anonymizer has been installed!`);
+        console.log(`graphql-anonymizer has been installed from ${url}`);
     })
     .catch(e => {
         console.log(e);
