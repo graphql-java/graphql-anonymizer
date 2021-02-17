@@ -69,7 +69,7 @@ The full list of options is available via `--help`:
 graphql-anonymizer --help
 ```
 
-## Bugs of feedback
+## Bugs or feedback
 
 Please open an Issue to raise a bug or other feedback.
 
@@ -77,7 +77,7 @@ Please open an Issue to raise a bug or other feedback.
 
 GraphQL Anonymizer is a thin wrapper around a
 [class inside GraphQL Java](https://github.com/graphql-java/graphql-java/blob/master/src/main/java/graphql/util/Anonymizer.java)
-It is compiled via [GraalVM](graalvm.org) to a native binary and distributed via NPM.
+. It is compiled via [GraalVM](graalvm.org) to a native binary and distributed via NPM.
 
 The cross-platform compiling, releasing and testing is done fully automatically via GitHub Actions. Have a look
 at [release.yml](./.github/workflows/release.yml) and [npm](/npm) if you want to know all the details.
