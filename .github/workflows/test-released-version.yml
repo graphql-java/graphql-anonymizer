@@ -38,11 +38,8 @@ jobs:
         run: grep "field1" test_result
 
   test-windows-image:
-    needs: [ build-jar-job ]
-    name: 'Build Windows Image'
+    name: 'Test Windows Image'
     runs-on: windows-latest
-    env:
-      RELEASE_VERSION: ${{ github.event.inputs.version }}
 
 
     steps:
