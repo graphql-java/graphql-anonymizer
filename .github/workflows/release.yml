@@ -235,3 +235,59 @@ jobs:
         working-directory: ./npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  test-non-windows-image:
+    name: 'Test Non-Windows Image'
+    needs: [ publish-to-npm ]
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest', 'macos-latest' ]
+        include:
+          - os: 'ubuntu-latest'
+            label: 'linux'
+          - os: 'macos-latest'
+            label: 'mac'
+    runs-on: ${{matrix.os}}
+
+
+    steps:
+      - name: 'Setup Node'
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+
+      - name: 'install'
+        run: npm i -g graphql-anonymizer@${{github.event.inputs.version}}
+
+      - name: 'run'
+        id: run-anonymizer
+        run: graphql-anonymizer <<< 'type Query{a:String}' > test_result
+
+      - name: 'assert'
+        run: grep "field1" test_result
+
+  test-windows-image:
+    name: 'Test Windows Image'
+    needs: [ publish-to-npm ]
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+
+
+    steps:
+      - name: 'Setup Node'
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+
+      - name: 'install'
+        run: npm i -g graphql-anonymizer@${{github.event.inputs.version}}
+
+
+      - name: 'run'
+        id: run-anonymizer
+        run: graphql-anonymizer <<< 'type Query{a:String}' > test_result
+
+      - name: 'assert'
+        run: grep "field1" test_result
