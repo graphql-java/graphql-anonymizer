@@ -51,9 +51,10 @@ jobs:
       - name: 'install'
         run: npm i -g graphql-anonymizer@${{github.event.inputs.version}}
 
+
       - name: 'run'
         id: run-anonymizer
-        run: graphql-anonymizer <<< 'type Query{a:String}' > test_result
+        run: echo "type Query{a:String}" > input.txt && graphql-anonymizer < input.txt > test_result
 
       - name: 'assert'
         run: grep "field1" test_result
