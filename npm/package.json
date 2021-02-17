@@ -1,6 +1,6 @@
 {
   "name": "graphql-anonymizer",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "description": "Anonymize GraphQL schemas and queries",
   "main": "index.js",
   "author": "",
