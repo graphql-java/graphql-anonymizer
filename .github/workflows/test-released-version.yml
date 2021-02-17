@@ -35,5 +35,30 @@ jobs:
         run: graphql-anonymizer <<< 'type Query{a:String}' > test_result
 
       - name: 'assert'
-        run: grep "fieldX" test_result
+        run: grep "field1" test_result
+
+  test-windows-image:
+    needs: [ build-jar-job ]
+    name: 'Build Windows Image'
+    runs-on: windows-latest
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
+
+
+    steps:
+      - name: 'Setup Node'
+        uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+
+      - name: 'install'
+        run: npm i -g graphql-anonymizer@${{github.event.inputs.version}}
+
+      - name: 'run'
+        id: run-anonymizer
+        run: graphql-anonymizer <<< 'type Query{a:String}' > test_result
+
+      - name: 'assert'
+        run: grep "field1" test_result
+
 
