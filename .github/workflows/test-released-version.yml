@@ -9,7 +9,7 @@ on:
 jobs:
 
   test-non-windows-image:
-    name: 'Build Non-Windows Image'
+    name: 'Test Non-Windows Image'
     strategy:
       matrix:
         os: [ 'ubuntu-latest', 'macos-latest' ]
@@ -23,7 +23,7 @@ jobs:
 
     steps:
       - name: 'Setup Node'
-        uses: actions/setup-node@2
+        uses: actions/setup-node@v2
         with:
           node-version: 12.x
 
