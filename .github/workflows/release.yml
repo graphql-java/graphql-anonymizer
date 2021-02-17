@@ -213,6 +213,8 @@ jobs:
     name: 'Publish npm package'
     needs: [ build-non-windows-image, build-windows-image ]
     runs-on: ubuntu-latest
+    env:
+      RELEASE_VERSION: ${{ github.event.inputs.version }}
 
     steps:
       - name: 'Checkout'
