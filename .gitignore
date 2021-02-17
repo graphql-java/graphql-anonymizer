@@ -4,3 +4,5 @@ build
 out
 graphql-anonymizer
 .DS_Store
+node_modules
+*.tgz

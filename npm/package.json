@@ -1,0 +1,24 @@
+{
+  "name": "graphql-anonymizer",
+  "version": "0.0.2",
+  "description": "Anonymize GraphQL schemas and queries",
+  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.21.1"
+  },
+  "bin": "graphql-anonymizer",
+  "files": [
+    "postinstall.js",
+    "package-lock.json",
+    "preinstall.js"
+  ],
+  "scripts": {
+    "preinstall": "node preinstall.js",
+    "postinstall": "node postinstall.js"
+  },
+  "engines": {
+    "node": ">=12"
+  }
+}
