@@ -51,7 +51,7 @@ tasks.withType<JavaCompile> {
 
 dependencies {
     implementation("info.picocli:picocli:4.6.1")
-    implementation("com.graphql-java:graphql-java:17.0-beta1")
+    implementation("com.graphql-java:graphql-java:0.0.0-2021-07-29T09-42-35-b7c6d4b5")
     annotationProcessor("info.picocli:picocli-codegen:4.6.1")
     testCompile("junit", "junit", "4.12")
 }
